@@ -15,7 +15,7 @@ c = conn.cursor()
 '''
 생성되는 테이블의 사용 용도
 id = 고유번호
-column1 = 내선번호
+column1 = 전화번호
 column2 = IP
 column3 = 부서
 column4 = 성명
@@ -119,7 +119,7 @@ tree.grid_configure(sticky='nsew')
 
 
 # Treeview 생성
-column1 = '내선번호'
+column1 =  '전화번호'
 column2 = 'IP'
 column3 = '부서'
 column4 = '성명'
