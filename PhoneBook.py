@@ -105,8 +105,8 @@ import_button = tk.Button(frame_input, width=10, text='가져오기', command=cs
 import_button.grid(row=5, column=1, columnspan=2, padx=15, pady=50, sticky='se')
 
 # label
-text_label = Label(frame_input, text='\n\n\n\n\n\n\n\n검색 : Ctrl + F\n\n새로고침 : F5\n', anchor='w')
-text_label.grid(row=7, column=0, columnspan=2, padx=10, pady=5, sticky='sw')
+text_label = Label(frame_input, text='\n\n\n\n\n\n\n\n 검색 : Ctrl + F\n\n새로고침 : F5\n', anchor='w')
+text_label.grid(row=7, column=0, padx=10, pady=5, sticky='sw')
 
 # Frame 2
 frame_treeview = Frame()
