@@ -7,8 +7,10 @@ from tkinter import messagebox
 from tkinter import ttk
 from tkinter import filedialog
 import sqlite3
+import pandas as pd
 
 # db 연결
+print('connect.db')
 conn = sqlite3.connect('PhoneBook.db')
 c = conn.cursor()
 
@@ -33,7 +35,7 @@ c.execute('''CREATE TABLE IF NOT EXISTS App_DB
             )''')
 conn.commit()
 
-
+print('run root window')
 # tkinter GUI 생성
 root = Tk()
 root.title('전화번호부') 
@@ -73,33 +75,40 @@ label_etc.grid(row=4, column=0, padx=5, pady=5)
 entry_etc = Entry(frame_input)
 entry_etc.grid(row=4, column=1, padx=5, pady=5)
 
+
+# csv export
+def csv_export():
+    print('export_explorer')
+    file_path = filedialog.asksaveasfilename(defaultextension='.csv') # 탐색기 실행
+    if file_path: # if : 선택한 파일 경로가 있을 경우
+        print('export_csv')
+        df = pd.read_sql_query("SELECT * from App_DB", conn) # DB에서 데이터 추출하고
+        df.to_csv(file_path, index=False, encoding='utf-8-sig') # csv 파일을 utf-8로 저장
+        messagebox.showinfo("완료", "파일 저장이 완료되었습니다.") # 완료 메시지
+export_button = tk.Button(frame_input, width=10, text='내보내기', command=csv_export)
+export_button.grid(row=5, column=0, columnspan=2, padx=25, pady=50, sticky='sw')
+
+# csv import
+def csv_import():
+    print('import_explorer')
+    file_path = filedialog.askopenfilename(defaultextension='.csv') # 탐색기 실행
+    if file_path: # if : 선택한 파일 경로가 있을 경우
+        print('import_csv')
+        df = pd.read_csv(file_path) # csv 데이터를 가져와서
+        for row in df.itertuples(): # DB에 데이터 추가
+            c.execute("INSERT INTO App_DB (column1, column2, column3, column4, column5) VALUES (?, ?, ?, ?, ?)",
+                        (row.column1, row.column2, row.column3, row.column4, row.column5))
+        conn.commit() # DB 접속 종료
+        load_data()
+        messagebox.showinfo("완료", "파일 불러오기가 완료되었습니다.") # 완료 메시지
+import_button = tk.Button(frame_input, width=10, text='가져오기', command=csv_import)
+import_button.grid(row=5, column=1, columnspan=2, padx=15, pady=50, sticky='se')
+
 # label
-text_label = Label(frame_input, text=
-'''
+text_label = Label(frame_input, text='\n\n\n\n\n\n\n\n검색 : Ctrl + F\n\n새로고침 : F5\n', anchor='w')
+text_label.grid(row=7, column=0, columnspan=2, padx=10, pady=5, sticky='sw')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-검색 : Ctrl + F
-
-새로고침 : F5
-''', anchor='w')
-text_label.grid(row=5, column=0, columnspan=2, padx=10, pady=5, sticky='sw')
-
-
-
-
-
+# Frame 2
 frame_treeview = Frame()
 frame_treeview.grid(row=0, column=1, padx=10, pady=10, sticky='n')
 
@@ -157,7 +166,7 @@ entry_team.bind('<Return>', next_entry)
 entry_name.bind('<Return>', next_entry)
 
 def load_data(event=True):
-    print('load_data!!')
+    print('load_data')
     # DB에서 데이터 불러오기
     c.execute("SELECT * FROM App_DB ORDER BY column1 ASC") #column1을 기준으로 오름차순 정렬 (Order By column1 ASC)
     rows = c.fetchall()
@@ -169,12 +178,13 @@ def load_data(event=True):
 load_data()
 
 def refresh_data(event=True):
+    print('refresh_data')
     messagebox.showinfo('INFO', '새로고침')
     load_data()
 root.bind('<F5>', refresh_data)
 
 def save_data(event=True):
-    print('save_data!!')
+    print('save_data')
     global conn, c, tree
     number = entry_number.get()
     ip = entry_ip.get()
@@ -311,23 +321,6 @@ for col in tree['columns']:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Treeview 검색 창 ========================================================================
 def search_ctrl_f(event):
     # Toplevel 창 열기
@@ -342,7 +335,7 @@ def search_ctrl_f(event):
     search_entry.grid(row=0, column=1, padx=10, pady=10)
     search_entry.focus()
     def search(event=None):
-        print('search!!')
+        print('search')
         search_term = search_var.get()
         if search_term:
             # 이전 검색 결과 초기화
