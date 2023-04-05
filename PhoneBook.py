@@ -326,46 +326,63 @@ def search_ctrl_f(event):
     search_popup.geometry('+800+300')
     # search_popup.iconbitmap('logo.ico')
     search_var = StringVar()
-    search_var.trace('w', lambda name, index, mode: search()) # Entry에 입력할 때마다 search 함수 호출
     search_entry = Entry(search_popup, textvariable=search_var, relief='flat', highlightthickness=1)
     search_entry.config(highlightbackground='gray', width=30)
     search_entry.grid(row=0, column=1, padx=10, pady=10)
     search_entry.focus()
-    def search(event=None):
-        print('search')
+    
+    # 검색을 하는데 첫번째부터 마지막까지 검색하고 결과값이 더 이상 없다면 처음 검색했던 값으로 돌아감
+    def search_and_select(tree, search_term):
+        # 이전 검색 결과 초기화
+        for row in tree.get_children():
+            tree.item(row, tags=())
+        # 검색어와 일치하는 row만 선택
+        found_rows = []
+        for row in tree.get_children():
+            item = tree.item(row)
+            values = item['values']
+            if search_term.lower() in str(values).lower():
+                found_rows.append(row)
+                tree.item(row, tags=('found',))
+        if found_rows:
+            # 검색 결과를 모두 찾은 경우
+            if len(found_rows) > 1:
+                # 일치하는 검색 결과를 선택하고 해당 위치로 이동
+                if search_and_select.current_result_index >= len(found_rows):
+                    search_and_select.current_result_index = 0
+                result_row = found_rows[search_and_select.current_result_index]
+                search_and_select.current_result_index += 1
+            # 검색 결과가 하나인 경우
+            else:
+                result_row = found_rows[0]
+                search_and_select.current_result_index = 0
+            
+            tree.selection_set(result_row)
+            tree.see(result_row)
+            return True
+        else:
+            # 일치하는 검색 결과가 없으면 모든 row 표시
+            for row in tree.get_children():
+                tree.item(row, tags=())
+            search_and_select.current_result_index = 0
+            return False
+    # 검색 결과의 인덱스를 저장하기 위한 변수 초기화
+    search_and_select.current_result_index = 0
+    def search_treeview(event=True):
         search_term = search_var.get()
         if search_term:
-            # 이전 검색 결과 초기화
-            for row in tree.get_children():
-                tree.item(row, tags=())
-            # 검색어와 일치하는 row만 선택
-            found_rows = []
-            for row in tree.get_children():
-                item = tree.item(row)
-                values = item['values']
-                if search_term.lower() in str(values).lower():
-                    found_rows.append(row)
-                    tree.item(row, tags=('found',))
-            # 검색 결과가 있다면, 선택된 row들을 상단으로 정렬
-            if found_rows:
-                tree.move(found_rows[0], '', 0)
-                for i, row in enumerate(found_rows[1:], 1):
-                    tree.move(row, '', i)
-                tree.tag_configure('found', background='khaki')
-                # tree.selection_set(found_rows) # 검색 결과를 선택
-                tree.see(found_rows[0])
+            found = search_and_select(tree, search_term)
+            if not found:
+                messagebox.showinfo("검색 결과 없음", "검색어와 일치하는 항목이 없습니다.")
         else:
-            # 검색어가 없으면 모든 row 표시
-            for row in tree.get_children():
-                tree.item(row, tags=())
+            messagebox.showinfo("검색어 입력", "검색어를 입력해주세요.")
+    # 검색 버튼 생성
+    search_button = ttk.Button(search_popup, text='검색', command=search_treeview)
+    search_button.grid(row=0, column=2, padx=10, pady=10)
     # 검색창 닫기
     def destroy_search_popup(event=True):
         search_popup.destroy()
-    search_entry.bind('<Return>', destroy_search_popup)
+    search_entry.bind('<Return>', search_treeview)
     search_entry.bind('<Escape>', destroy_search_popup)
 root.bind('<Control-f>', search_ctrl_f)
-
-
-
-
 root.mainloop()
