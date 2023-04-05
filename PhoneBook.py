@@ -385,4 +385,8 @@ def search_ctrl_f(event):
     search_entry.bind('<Return>', search_treeview)
     search_entry.bind('<Escape>', destroy_search_popup)
 root.bind('<Control-f>', search_ctrl_f)
+
+
+
+
 root.mainloop()
