@@ -35,7 +35,7 @@ conn.commit()
 print('run root window')
 # tkinter GUI 생성
 root = Tk()
-root.title('전화번호부') 
+root.title('전화번호부 - 2023-04-25') 
 root.geometry('+400+300')
 # root.state('zoomed') # 전체화면
 # root.iconbitmap('logo.ico')
@@ -236,6 +236,7 @@ def on_double_click(event):
     new_ent1.grid(row=0, column=1, padx=10, pady=10)
     new_ent1.focus() # new_ent1에 프롬프트 설정
     
+    
     new_lab2 = Label(new_ent_frame, text='부서')
     new_lab2.grid(row=1, column=0, sticky=W)
     new_ent2 = Entry(new_ent_frame, width=30, relief='flat', highlightthickness=1)
@@ -254,11 +255,7 @@ def on_double_click(event):
     new_ent4.config(highlightbackground='gray')
     new_ent4.grid(row=3, column=1, padx=10, pady=10)
     
-    # 기존 DB 데이터를 ent에 입력
-    # new_ent1.insert(0, values[1])  
-    # new_ent2.insert(0, values[2])  
-    # new_ent3.insert(0, values[3])  
-    # new_ent4.insert(0, values[4])  
+
     
     # 선택한 행의 값들 가져오기
     selection = tree.selection()
@@ -266,6 +263,14 @@ def on_double_click(event):
         return
     values = tree.item(selection[0], 'values')
 
+    # 기존 값 불러오기
+    new_ent1.insert(0, values[1])
+    new_ent1.selection_range(0, END) # 셀 전체 선택
+    new_ent2.insert(0, values[2])
+    new_ent3.insert(0, values[3])
+    new_ent4.insert(0, values[4])
+    
+    
     def update_data(event=True):
         global conn, c, tree
         selected_item = tree.focus()
@@ -299,20 +304,26 @@ tree.bind('<Double-1>', on_double_click)
 
 
 
-# Header 클릭을 통한 데이터 정렬
+# Treeview 열 헤더 클릭 시 정렬하는 함수 / IP를 스플릿 해서 순차 정렬 하는 속성 추가
 def treeview_sort_column(tv, col, reverse):
-    """Treeview 열 정렬 함수"""
-    l = [(tv.set(k, col), k) for k in tv.get_children('')]
-    l.sort(reverse=reverse)
-    # 정렬할 데이터가 숫자일 경우
-    # l.sort(reverse=reverse, key=lambda x: int(x[0]))
-    # 정렬할 데이터가 날짜일 경우
-    # l.sort(reverse=reverse, key=lambda x: datetime.datetime.strptime(x[0], '%Y-%m-%d'))
+    # 각 열의 데이터 타입 지정
+    data_types = {
+        column1: str,
+        column2: str,
+        column3: str,
+        column4: str,
+        column5: str
+    }
+    data_type = data_types[col] # 현재 열의 데이터 타입
+    if col == 'IP':
+        l = [(tuple(map(int, tv.set(k, col).split('.'))), k) for k in tv.get_children('') if tv.set(k, col)] # 빈 값이 아닌 경우에만 추가
+        l.sort(reverse=reverse)
+    else:
+        l = [(data_type(tv.set(k, col)), k) for k in tv.get_children('') if tv.set(k, col)] # 빈 값이 아닌 경우에만 추가
+        l.sort(key=lambda x: x[0], reverse=reverse)
     for index, (val, k) in enumerate(l):
         tv.move(k, '', index)
-    # 다시 한번 클릭 시 정렬 순서를 바꾸기 위해 열 상태를 기록
     tv.heading(col, command=lambda: treeview_sort_column(tv, col, not reverse))
-# Tree1과 Tree2의 열 헤더를 클릭 시 정렬
 for col in tree['columns']:
     tree.heading(col, text=col, command=lambda _col=col: treeview_sort_column(tree, _col, False))
 
