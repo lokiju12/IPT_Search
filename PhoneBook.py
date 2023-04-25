@@ -6,6 +6,16 @@ from tkinter import filedialog
 import sqlite3
 import pandas as pd
 
+
+'''
+2023-04-25
+- 기존 데이터를 수정할 경우 Entry에 기존 데이터 값을 가져오고 변경한 내용만 업데이트 
+2023-04-26
+- 헤더를 눌러 정렬할 경우 IP를 .을 기준으로 쪼개서 정렬할 수 있도록
+'''
+
+
+
 # db 연결
 print('connect.db')
 conn = sqlite3.connect('PhoneBook.db')
@@ -326,6 +336,51 @@ def treeview_sort_column(tv, col, reverse):
     tv.heading(col, command=lambda: treeview_sort_column(tv, col, not reverse))
 for col in tree['columns']:
     tree.heading(col, text=col, command=lambda _col=col: treeview_sort_column(tree, _col, False))
+
+
+
+# Treeview 페이지 업/다운 이벤트 함수
+
+last_select = None # 마지막으로 선택된 아이템 저장
+
+def treeview_page_scroll(event, direction):
+    global last_select
+    
+    # 기존 선택 아이템 해제
+    tree.selection_remove(last_select)
+    
+    # 이동 방향에 따라 스크롤
+    if direction == 'up':
+        tree.yview_scroll(-1, 'pages')
+        last_select = tree.get_children()[0] # 최상단 아이템 선택
+    elif direction == 'down':
+        tree.yview_scroll(1, 'pages')
+        last_select = tree.get_children()[-1] # 최하단 아이템 선택
+    
+    # 이동 후 아이템 선택
+    tree.selection_add(last_select)
+    
+# Treeview 페이지 업/다운 이벤트 등록
+tree.bind('<Prior>', lambda event: treeview_page_scroll(event, 'up')) # Prior: Page Up 키
+tree.bind('<Next>', lambda event: treeview_page_scroll(event, 'down')) # Next: Page Down 키
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
