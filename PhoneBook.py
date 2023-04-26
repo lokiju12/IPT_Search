@@ -229,12 +229,17 @@ tree.bind('<Delete>', delete_data)
 
 
 def on_double_click(event):
+    # 첫 번째 열(헤더)에서 더블클릭이 일어나면 함수를 끝냄
+    if event.widget.identify_region(event.x, event.y) == 'heading':
+        print('heading 더블 클릭 차단')
+        return
+    
     # Toplevel 창 열기
     top = Toplevel(root)
     top.title('수정')
     top.geometry('+1000+400')
     # top.iconbitmap('logo.ico')
-    
+
     # Frame
     new_ent_frame = Frame(top)
     new_ent_frame.pack(padx=20, pady=20)
