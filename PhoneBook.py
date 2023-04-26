@@ -319,6 +319,10 @@ tree.bind('<Double-1>', on_double_click)
 
 
 
+
+
+
+
 # Treeview 열 헤더 클릭 시 정렬하는 함수 / IP를 스플릿 해서 순차 정렬 하는 속성 추가
 def treeview_sort_column(tv, col, reverse):
     # 각 열의 데이터 타입 지정
@@ -331,7 +335,17 @@ def treeview_sort_column(tv, col, reverse):
     }
     data_type = data_types[col] # 현재 열의 데이터 타입
     if col == 'IP':
-        l = [(tuple(map(int, tv.set(k, col).split('.'))), k) for k in tv.get_children('') if tv.set(k, col)] # 빈 값이 아닌 경우에만 추가
+        l = []
+        for k in tv.get_children(''):
+            ip_str = tv.set(k, col)
+            if ip_str:
+                try:
+                    ip_tuple = tuple(map(int, ip_str.split('.')))
+                except ValueError:
+                    ip_tuple = (-1,) * 4 # 잘못된 IP는 -1로 채움
+            else:
+                ip_tuple = (0,) * 4 # 빈 값은 0으로 채움
+            l.append((ip_tuple, k))
         l.sort(reverse=reverse)
     else:
         l = [(data_type(tv.set(k, col)), k) for k in tv.get_children('') if tv.set(k, col)] # 빈 값이 아닌 경우에만 추가
@@ -339,47 +353,9 @@ def treeview_sort_column(tv, col, reverse):
     for index, (val, k) in enumerate(l):
         tv.move(k, '', index)
     tv.heading(col, command=lambda: treeview_sort_column(tv, col, not reverse))
+
 for col in tree['columns']:
     tree.heading(col, text=col, command=lambda _col=col: treeview_sort_column(tree, _col, False))
-
-
-
-# Treeview 페이지 업/다운 이벤트 함수
-
-last_select = None # 마지막으로 선택된 아이템 저장
-
-def treeview_page_scroll(event, direction):
-    global last_select
-    
-    # 기존 선택 아이템 해제
-    tree.selection_remove(last_select)
-    
-    # 이동 방향에 따라 스크롤
-    if direction == 'up':
-        tree.yview_scroll(-1, 'pages')
-        last_select = tree.get_children()[0] # 최상단 아이템 선택
-    elif direction == 'down':
-        tree.yview_scroll(1, 'pages')
-        last_select = tree.get_children()[-1] # 최하단 아이템 선택
-    
-    # 이동 후 아이템 선택
-    tree.selection_add(last_select)
-    
-# Treeview 페이지 업/다운 이벤트 등록
-tree.bind('<Prior>', lambda event: treeview_page_scroll(event, 'up')) # Prior: Page Up 키
-tree.bind('<Next>', lambda event: treeview_page_scroll(event, 'down')) # Next: Page Down 키
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
