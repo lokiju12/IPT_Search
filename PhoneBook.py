@@ -5,7 +5,7 @@ from tkinter import ttk
 from tkinter import filedialog
 import sqlite3
 import pandas as pd
-
+import time
 
 '''
 2023-04-25
@@ -43,9 +43,10 @@ c.execute('''CREATE TABLE IF NOT EXISTS App_DB
 conn.commit()
 
 print('run root window')
+
 # tkinter GUI 생성
 root = Tk()
-root.title('전화번호부 - 2023-04-25') 
+root.title('전화번호부') 
 root.geometry('+400+300')
 # root.state('zoomed') # 전체화면
 # root.iconbitmap('logo.ico')
@@ -432,6 +433,36 @@ def search_ctrl_f(event):
     search_entry.bind('<Return>', search_treeview)
     search_entry.bind('<Escape>', destroy_search_popup)
 root.bind('<Control-f>', search_ctrl_f)
+
+
+
+
+
+
+
+
+# 일정 시간 키보드 마우스 움직임이 없다면 윈도우가 종료 되도록 설정
+# 이 시간이 지나면 종료 됨
+def start_timer():
+    global timer
+    timer = root.after(600000, root.destroy) # 1000 = 1초, 60000 = 60초(1분), 600000 = 10분
+# 종료 대기 시간을 초기화
+def reset_timer(event):
+    root.after_cancel(timer)
+    start_timer()
+# 마우스 움직임
+def track_mouse(event):
+    root.after_cancel(timer)
+    start_timer()
+# 키보드 마우스 버튼 동작, 마우스 움직임을 바인드
+root.bind_all('<Any-KeyPress>', reset_timer)
+root.bind_all('<Any-ButtonPress>', reset_timer)
+root.bind_all('<Motion>', track_mouse)
+# 종료 타이머 시작
+start_timer()
+
+
+
 
 
 
