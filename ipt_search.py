@@ -12,7 +12,7 @@ def download_csv(url, save_path):
     else:
         print("\n파일을 다운로드할 수 없습니다.\n")
 
-url = "http://10.10.10.20/ipt/DBTable/user_profile.csv"
+url = "http://교환기서버주소/ipt/DBTable/user_profile.csv"
 save_path = "c:/domain/ipt/user_profile.csv"
 
 download_csv(url, save_path)
